@@ -17,7 +17,7 @@ int main(void) {
         system("exec libreoffice --writer");
     } else {
 
-        // waits 3 seconds before killing it
+        // waits 3 seconds before killing libre office
         sleep(3);
         system("kill $(ps aux | grep libreoffice | awk '{print $2}')");
     }
