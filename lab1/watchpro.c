@@ -1,4 +1,4 @@
-// this file has been bullshitted to the extreme, wtf is this
+    // this file has been bullshitted to the extreme, wtf is this
 
 
 #include <sys/wait.h>
@@ -48,7 +48,12 @@ int main(void) {
         }
 
         snprintf(path, sizeof(path), "/proc/%s/stat");
-        // TODO read required info from /proc/[PID]/stat
+        FILE * fd = fopen(path, "r");
+
+        // TODO get memory info and run-time from proc/[PID]/stat
+        // TODO ensure that process being checked wont brick the PC
+
+        fclose(fd);
     }
 
 }
@@ -57,7 +62,7 @@ int main(void) {
 // looks through file names in /proc, returning 1 for every pid found and 0 for eveything else
 int isPID(struct dirent *current) {
     for (char * name = current->d_name; *name; name++) {
-        if (!isdigit(name)) {
+        if (!isdigit(*name)) {
             return 0;
         }
     }
