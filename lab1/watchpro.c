@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-int isPID(struct dirent *current);
+int isEssentialPID(struct dirent *current);
 
 int main(void) {
     char * path[268]; // d_name = 256, 5 for /proc, 7 for /status
@@ -43,11 +43,11 @@ int main(void) {
     // reads through proc directory
     while ((current = readdir(proc))) {
         // ensures current position in proc is a running process
-        if (!isPID(current)) {
+        if (!isEssentialPID(current)) {
             continue;
         }
 
-        snprintf(path, sizeof(path), "/proc/%s/stat");
+        snprintf(path, sizeof(path), "/proc/%s/stat", current->d_name);
         FILE * fd = fopen(path, "r");
 
         // TODO get memory info and run-time from proc/[PID]/stat
@@ -60,11 +60,21 @@ int main(void) {
 
 
 // looks through file names in /proc, returning 1 for every pid found and 0 for eveything else
-int isPID(struct dirent *current) {
+int isEssentialPID(struct dirent *current) {
     for (char * name = current->d_name; *name; name++) {
         if (!isdigit(*name)) {
             return 0;
         }
     }
+
+    char check[268];
+    snprintf(check, sizeof(check), "/proc/%s/cmdline", current->d_name);
+
+    DIR * essential = opendir(check);
+
+    if (!readdir(check)) {
+        return 0;
+    }
+
     return 1;
 }
