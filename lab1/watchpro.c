@@ -1,4 +1,4 @@
-    // this file has been bullshitted to the extreme, wtf is this
+// this file has been bullshitted to the extreme, wtf is this
 
 
 #include <sys/wait.h>
@@ -15,7 +15,7 @@
 int isEssentialPID(struct dirent *current);
 
 int main(void) {
-    char * path[268]; // d_name = 256, 5 for /proc, 7 for /status
+    char path[268]; // d_name = 256, 5 for /proc, 7 for /status
     char buf[62];
     char * endptr;
     int pid;
@@ -41,7 +41,7 @@ int main(void) {
     DIR * proc = opendir("/proc");
 
     // reads through proc directory
-    while ((current = readdir(proc))) {
+    while ((current = readdir(proc)) != NULL) {
         // ensures current position in proc is a running process
         if (!isEssentialPID(current)) {
             continue;
@@ -51,7 +51,6 @@ int main(void) {
         FILE * fd = fopen(path, "r");
 
         // TODO get memory info and run-time from proc/[PID]/stat
-        // TODO ensure that process being checked wont brick the PC
 
         fclose(fd);
     }
@@ -59,7 +58,7 @@ int main(void) {
 }
 
 
-// looks through file names in /proc, returning 1 for every pid found and 0 for eveything else
+// looks through file names in /proc, returning 10 for every non PID found
 int isEssentialPID(struct dirent *current) {
     for (char * name = current->d_name; *name; name++) {
         if (!isdigit(*name)) {
@@ -67,12 +66,14 @@ int isEssentialPID(struct dirent *current) {
         }
     }
 
-    char check[268];
+    // checks if the current PID is a kernel thread (proc/[pid]/cmdline is empty), if its a kernel thread return 0, else return 1
+    char check[30];
+    int count = 0;
     snprintf(check, sizeof(check), "/proc/%s/cmdline", current->d_name);
 
     DIR * essential = opendir(check);
 
-    if (!readdir(check)) {
+    if (essential == NULL) {
         return 0;
     }
 
