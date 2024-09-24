@@ -11,9 +11,10 @@
 #include <signal.h>
 #include <errno.h>
 #include <stdio.h>
+#include <time.h>
 #include <fcntl.h>
 
-int isEssentialPID(struct dirent *current);
+int isPID(struct dirent *current);
 
 int main(void) {
     char path[268]; // d_name = 256, 5 for /proc, 7 for /status
@@ -42,7 +43,7 @@ int main(void) {
     // reads through proc directory
     while ((current = readdir(proc)) != NULL) {
         // ensures current position in proc is a running process
-        if (!isEssentialPID(current)) {
+        if (!isPID(current)) {
             continue;
         }
 
@@ -53,11 +54,41 @@ int main(void) {
             continue;
         }
 
+        // sores info from /proc/[pid]/stat into the buffer
         char buffer[200];
         char temp[100];
         while(fgets(temp, 100, fd) != NULL) {
             strcat(buffer, temp);
         }
+
+        char *token;
+        int count = 1;
+        token = strtok(buffer, " ");
+
+        // go through all the tokens looking for 
+        while (token != NULL) {
+            token = strtok(NULL, " ");
+            count++;
+            if (count == 22) {
+                if (!isdigit(token)) {
+                    continue;
+                }
+
+                // this one needs a bit of reworking its meant to tell if a process has been running for 3+ minutes
+                if ((int) token/sysconf(_SC_CLK_TCK)) {
+                    // TODO store PID and name of this process
+                } 
+            } else if (count == 24) { // checking if memory usage is 200kb or more
+                if (!isdigit(token)) {
+                    continue;
+                }
+
+                if ((int) token >= 200000) {
+                    // TODO store PID and name of this process
+                }
+            }
+        }
+
 
         printf("%s", buffer);
 
@@ -68,7 +99,7 @@ int main(void) {
 
 
 // looks through file names in /proc, returning 10 for every non PID found
-int isEssentialPID(struct dirent *current) {
+int isPID(struct dirent *current) {
     int test = 0;
 
     for (char * name = current->d_name; *name; name++) {
