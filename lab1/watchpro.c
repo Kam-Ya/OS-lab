@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
+#include <errno.h>
 #include <stdio.h>
 #include <fcntl.h>
 
@@ -31,10 +32,8 @@ int main(void) {
     char num[11] = {buf[16], buf[17], buf[18], buf[19], buf[20], buf[21], buf[22], buf[23], '0','0','0'};
     unsigned long memTotal = strtoull(num, &endptr, 10);
 
-    // clears buffer for future use
     memset(buf, 0, 62);
 
-    // closes /proc/meminfo
     fclose(fd);
 
     // opens /proc directory
@@ -49,8 +48,18 @@ int main(void) {
 
         snprintf(path, sizeof(path), "/proc/%s/stat", current->d_name);
         FILE * fd = fopen(path, "r");
+        if (fd == NULL) {
+            printf("Error opening stat file\n");
+            continue;
+        }
 
-        // TODO get memory info and run-time from proc/[PID]/stat
+        char buffer[200];
+        char temp[100];
+        while(fgets(temp, 100, fd) != NULL) {
+            strcat(buffer, temp);
+        }
+
+        printf("%s", buffer);
 
         fclose(fd);
     }
@@ -60,21 +69,12 @@ int main(void) {
 
 // looks through file names in /proc, returning 10 for every non PID found
 int isEssentialPID(struct dirent *current) {
+    int test = 0;
+
     for (char * name = current->d_name; *name; name++) {
         if (!isdigit(*name)) {
             return 0;
         }
-    }
-
-    // checks if the current PID is a kernel thread (proc/[pid]/cmdline is empty), if its a kernel thread return 0, else return 1
-    char check[30];
-    int count = 0;
-    snprintf(check, sizeof(check), "/proc/%s/cmdline", current->d_name);
-
-    DIR * essential = opendir(check);
-
-    if (essential == NULL) {
-        return 0;
     }
 
     return 1;
