@@ -64,12 +64,17 @@ int main(void) {
         char *token;
         int count = 1;
         token = strtok(buffer, " ");
-
+        int PID = token;
+        char *name;
         // go through all the tokens looking for 
         while (token != NULL) {
             token = strtok(NULL, " ");
             count++;
-            if (count == 22) {
+
+
+            if (count == 2) {
+                name = token;
+            } else if (count == 22) {
                 if (!isdigit(token)) {
                     continue;
                 }
