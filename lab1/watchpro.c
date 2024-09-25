@@ -1,6 +1,3 @@
-// this file has been bullshitted to the extreme, wtf is this
-
-
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -22,82 +19,110 @@ int main(void) {
     char * endptr;
     int pid;
     struct dirent *current;
+    FILE *fd;
+    
+    while (1) {
 
-    // creates file to read memory information
-    FILE *fd = fopen("/proc/meminfo","r");
-
-    // gets the first line /proc/meminfo
-    fgets(buf, 62, fd);
-
-    // writes numbers to another character array with added 0's as the number is represented in kilobytes, and writes it to an unsigned long
-    char num[11] = {buf[16], buf[17], buf[18], buf[19], buf[20], buf[21], buf[22], buf[23], '0','0','0'};
-    unsigned long memTotal = strtoull(num, &endptr, 10);
-
-    memset(buf, 0, 62);
-
-    fclose(fd);
-
-    // opens /proc directory
-    DIR * proc = opendir("/proc");
-
-    // reads through proc directory
-    while ((current = readdir(proc)) != NULL) {
-        // ensures current position in proc is a running process
-        if (!isPID(current)) {
-            continue;
-        }
-
-        snprintf(path, sizeof(path), "/proc/%s/stat", current->d_name);
-        FILE * fd = fopen(path, "r");
-        if (fd == NULL) {
-            printf("Error opening stat file\n");
-            continue;
-        }
-
-        // sores info from /proc/[pid]/stat into the buffer
-        char buffer[200];
-        char temp[100];
-        while(fgets(temp, 100, fd) != NULL) {
-            strcat(buffer, temp);
-        }
-
-        char *token;
-        int count = 1;
-        token = strtok(buffer, " ");
-        int PID = token;
-        char *name;
-        // go through all the tokens looking for 
-        while (token != NULL) {
-            token = strtok(NULL, " ");
-            count++;
+        int mem = 0;
+        int tim = 0;
+        char *memory[100][2];
+        char *time[100][2];
 
 
-            if (count == 2) {
-                name = token;
-            } else if (count == 22) {
-                if (!isdigit(token)) {
-                    continue;
-                }
+        // opens /proc directory
+        DIR * proc = opendir("/proc");
 
-                // this one needs a bit of reworking its meant to tell if a process has been running for 3+ minutes
-                if ((int) token/sysconf(_SC_CLK_TCK)) {
-                    // TODO store PID and name of this process
-                } 
-            } else if (count == 24) { // checking if memory usage is 200kb or more
-                if (!isdigit(token)) {
-                    continue;
-                }
-
-                if ((int) token >= 200000) {
-                    // TODO store PID and name of this process
-                }
+        // reads through proc directory
+        while ((current = readdir(proc)) != NULL) {
+            // ensures current position in proc is a running process
+            if (!isPID(current)) {
+                continue;
             }
+
+            snprintf(path, sizeof(path), "/proc/%s/stat", current->d_name);
+            FILE * fd = fopen(path, "r");
+            if (fd == NULL) {
+                printf("Error opening stat file\n");
+                continue;
+            }
+
+            // sores info from /proc/[pid]/stat into the buffer
+            char buffer[200];
+            char temp[100];
+            while(fgets(temp, 100, fd) != NULL) {
+                strcat(buffer, temp);
+            }
+
+            char *token;
+            int count = 1;
+            token = strtok(buffer, " ");
+            char* PID;
+            char *name;
+
+            // go through all the tokens looking for processes using more than 200Kb of memory or 3 minutes+ of cpu time
+            while (token != NULL) {
+                PID = token;
+                
+                if (count == 2) {
+                    name = token;
+                } else if (count == 14) {
+                    if (!isdigit(token)) { 
+                        printf("you messed up");
+                        continue; // if this runs i messed up
+                    }
+
+                    if ((int) token/sysconf(_SC_CLK_TCK) >= 180) {
+                        time[tim][0] = PID;
+                        time[tim][1] = name;
+                        tim++;
+                    } 
+                } else if (count == 24) { // checking if memory usage is 200kb or more
+                    if (!isdigit(token)) {
+                        printf("you messed up");
+                        continue; // if this runs i messed up
+                    }
+
+                    if ((int) token >= 200000) {
+                        memory[mem][0] = PID;
+                        memory[mem][1] = name;
+                        mem++;
+                    }
+                }
+                count++;
+                token = strtok(NULL, " ");
+            }
+            
+            fclose(fd);
         }
 
+        // prints the programs that meet the criteria to possibly be killed
+        printf("Using more than 200K:\n");
+        for (int i = 0; i < mem; i++) {
+            printf("%d - %sn", i + 1, memory[i][0]);
+        }
 
-        printf("%s", buffer);
+        printf("\nUsing more than 3 minutes:\n");
+        for (int i = 0; i < tim; i++) {
+            printf("%d - %sn", i + mem + 1, time[i][0]);
+        }
 
-        fclose(fd);
+        // gets input from user on which process to kill, or to pass and refresh
+        int input;
+        printf("Input the number of what program to kill, or any other number to wait for next refresh: ");
+        scanf("%d", &input);
+
+        //decides what to do with input
+        char *command;
+        if(input > 0 && input < mem + 1) {
+            snprintf(command, sizeof(command), "kill %d", (int) memory[input - 1][0]);
+            system(command);
+        } else if (input > 0 && input < mem + tim + 1) {
+            snprintf(command, sizeof(command), "kill %d", (int) time[input - 1 - mem][0]);
+            system(command);
+        } else {
+            continue;
+        }
+
     }
 
 }
