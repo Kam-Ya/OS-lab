@@ -56,37 +56,33 @@ int main(void) {
             char *token;
             int count = 1;
             token = strtok(buffer, " ");
-            char* PID;
+            char *PID;
             char *name;
-
+            
             // go through all the tokens looking for processes using more than 200Kb of memory or 3 minutes+ of cpu time
             while (token != NULL) {
-                PID = token;
                 
-                if (count == 2) {
-                    name = token;
-                } else if (count == 14) {
-                    if (!isdigit(token)) { 
-                        printf("you messed up");
-                        continue; // if this runs i messed up
-                    }
-
-                    if ((int) token/sysconf(_SC_CLK_TCK) >= 180) {
-                        time[tim][0] = PID;
-                        time[tim][1] = name;
-                        tim++;
-                    } 
-                } else if (count == 24) { // checking if memory usage is 200kb or more
-                    if (!isdigit(token)) {
-                        printf("you messed up");
-                        continue; // if this runs i messed up
-                    }
-
-                    if ((int) token >= 200000) {
-                        memory[mem][0] = PID;
-                        memory[mem][1] = name;
-                        mem++;
-                    }
+                switch(count) {
+                    case 1:
+                        PID = token;
+                        break;
+                    case 2:
+                        name = token;
+                        break;
+                    case 14:
+                         if ((int) *token/sysconf(_SC_CLK_TCK) >= 180) { // checking how long a program has run in user mode to distinguish from kernel threads
+                            time[tim][0] = PID;
+                            time[tim][1] = name;
+                            tim++;
+                        } 
+                        break;
+                    case 24:
+                        if ((int) *token >= 200000) { // checking if memory usage is 200kb or more
+                            memory[mem][0] = PID;
+                            memory[mem][1] = name;
+                            mem++;
+                        }
+                        break;
                 }
                 count++;
                 token = strtok(NULL, " ");
@@ -108,18 +104,19 @@ int main(void) {
 
         // gets input from user on which process to kill, or to pass and refresh
         int input;
-        printf("Input the number of what program to kill, or any other number to wait for next refresh: ");
+        printf("\nInput the number of what program to kill, or any other number to wait for next refresh: ");
         scanf("%d", &input);
 
         //decides what to do with input
         char *command;
         if(input > 0 && input < mem + 1) {
-            snprintf(command, sizeof(command), "kill %d", (int) memory[input - 1][0]);
+            snprintf(command, sizeof(command), "kill %d", (int) *memory[input - 1][0]);
             system(command);
         } else if (input > 0 && input < mem + tim + 1) {
-            snprintf(command, sizeof(command), "kill %d", (int) time[input - 1 - mem][0]);
+            snprintf(command, sizeof(command), "kill %d", (int) *time[input - 1 - mem][0]);
             system(command);
         } else {
+            printf("\n\n");
             continue;
         }
 

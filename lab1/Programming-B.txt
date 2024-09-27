@@ -1,0 +1,7 @@
+    to find the PID of libre office i ran the command "ps aux | grep libreoffice | awk '{print $2}'"
+    
+    Firstly, "ps aux" is used to obtain information about all processes running on the computer.
+    Piping the command with "grep libreoffice" allowed ps to limit itself to processes with containing the word "libreoffice" in it
+    And finally piping that with "awk '{print $2}'" takes only the second column from the output from the previous commands, this second column being the PID.
+
+    then I can simply run the "kill" command on the PID to kill process
