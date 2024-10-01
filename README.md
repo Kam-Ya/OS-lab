@@ -12,8 +12,8 @@
       
     I failed to properly implement program number 5, I realize now that I was over complicating the question  
     I tried to use the /proc file system to see all processes and get information about them. I should have used the "ps" command and run that into a text file which I could then have read from.  
-    This would have been a better and simpler approach, this should have been how I made the other programs as well.  
-    Though over complicated other than my failure to achieve the goal I do not regret how this lab turned out as I found it very educational.
+    This would have been a better and simpler approach. I should have used this approavh to make the other programs as well.  
+    Other than my failure to achieve the goal I do not regret how this lab turned out as I found it very educational.
 2. Lab2 **Scheduling**
     - Analytical questions and answers covered
     - 1 programming question:
