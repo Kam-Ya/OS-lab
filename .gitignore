@@ -2,3 +2,6 @@
 *.exe~
 *.zip
 *.zip~
+*.vscode
+.vscode
+*.vscode~
