@@ -17,4 +17,4 @@
 2. Lab2 **Scheduling**
     - Analytical questions and answers covered
     - 1 programming question:
-        1. Design and implement a multi-level queue with priority levels 1, 2, and 3. Give system processes a higher priority than user processes, consider processes to have fixed priority
+        1. Design and implement a multi-level queue with priority levels 1, 2, and 3. Give system processes a higher priority than user processes, consider processes to have fixed priority. Each queue should have its own scheduling scheme
