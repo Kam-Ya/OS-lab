@@ -27,6 +27,7 @@ void removeElement (struct queue * L);
 struct node * dequeue(struct queue * L);
 struct node * dequeueLong(struct queue * L);
 struct queue * build();
+struct node * dequeueShort(struct queue * L);
 
 int main (void) {
 
@@ -129,5 +130,33 @@ struct node * dequeueLong(struct queue * L) {
     *temp = MAX->info;
     L->elements--;
     free(MAX);
+    free(current);
+    return temp;
+}
+
+struct node * dequeueShort(struct queue * L) {
+    if (!L || !L->list || !L->list->start || L->elements == 0) { // checking if input is valid
+        printf("Invalid Input");
+        return;
+    }
+
+    struct element *current = L->list->start->next;
+    struct element *MIN = current;
+
+    while (current != L->list->start) {
+        if (current->info.time <= MIN->info.time) {
+            MIN = current;
+        }
+        current = current->next;
+    }
+
+    MIN->next->prev = MIN->prev;
+    MIN->prev->next = MIN->next;
+
+    struct node * temp = malloc(sizeof(struct node));
+    *temp = MIN->info;
+    L->elements--;
+    free(MIN);
+    free(current);
     return temp;
 }
