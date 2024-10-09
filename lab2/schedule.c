@@ -5,11 +5,12 @@
 struct node { // contains node information
     char* key;
     unsigned long priority;
+    int time;
 };
 
 struct element { // contains node and pointers to previous and next nodes
     struct node info;
-    struct Elements * next, * prev;
+    struct element * next, * prev;
 };
 
 struct DLLS { // double linked list
@@ -32,10 +33,28 @@ int main (void) {
 
 void enqueue(struct queue * L, struct node Node) {
 
+    // create new element and place information into it
+    struct element * E = (struct element *) malloc(sizeof(struct element));
+    E->info = Node;
+
+    // move pointers
+    E->next = L->list->start->next;
+    E->prev = L->list->start;
+    L->list->start->next->prev = E;
+    L->list->start->next = E;
+
+    L->elements++;
 }
 
 void dequeue(struct queue * L) {
+    if (!L || !L->list || !L->list->start || L->elements == 0) { // checking if input is valid
+        printf("Invalid Input");
+        return;
+    }
 
+    struct element * temp = L->list->start->next;
+    temp -> prev -> next = temp -> next;
+    temp -> next -> prev = temp -> prev
 }
 
 void removeElement (struct queue * L) {
@@ -62,6 +81,7 @@ struct queue * build() { // build the structure of the queue, mostly memory assi
             // start node doesnt need any information its never read besides its next and prev pointers
             Q -> list -> start -> info.key = NULL;
             Q -> list -> start -> info.priority = NULL;
+            Q -> list -> start -> info.time = NULL;
         } else {
             printf("Error in assigning memory to start node");
             return 0;
