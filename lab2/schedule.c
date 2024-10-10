@@ -4,7 +4,7 @@
 
 struct node { // contains node information
     char* key;
-    unsigned long priority;
+    int priority;
     int time;
 };
 
@@ -23,14 +23,53 @@ struct queue {
 };
 
 void enqueue(struct queue * L, struct node Node);
-void removeElement (struct queue * L);
 struct node * dequeue(struct queue * L);
 struct node * dequeueLong(struct queue * L);
 struct queue * build();
 struct node * dequeueShort(struct queue * L);
 
 int main (void) {
+    struct queue *high = build();
+    struct queue *med = build();
+    struct queue *low = build();
 
+    // nodes for test cases
+    struct node one = {.key = "high 1", .priority = 3, .time = 5};
+    struct node two = {.key = "high 2", .priority = 3, .time = 3};
+    struct node three = {.key = "medium 1, time = 5", .priority = 2, .time = 5};
+    struct node four = {.key = "medium 2, time = 3", .priority = 2, .time = 3};
+    struct node five = {.key = "low 1, time = 5", .priority = 2, .time = 5};
+    struct node six = {.key = "low 2, time = 3", .priority = 2, .time = 3};
+
+    struct node processes[] = {one, two, three, four, five, six};
+
+    for (int i = 0; i < 6; i++) {
+        if (processes[i].priority == 3) {
+            enqueue(high, processes[i]);
+        } else if (processes[i].priority == 2) {
+            enqueue(med, processes[i]);
+        } else {
+            enqueue(low, processes[i]);
+        }
+    }
+
+    while (high->list->start->next != high->list->start) {
+        struct node *temp = dequeue(high);
+        printf("dequeued: %s\npriority: %d\nlength: %d\n", temp->key, temp->priority, temp->time);
+        free(temp); // no floating memory here
+    }
+
+    while (med->list->start->next != med->list->start) {
+        struct node *temp = dequeue(med);
+        printf("dequeued: %s\npriority: %d\nlength: %d\n", temp->key, temp->priority, temp->time);
+        free(temp); // no floating memory here
+    }
+
+    while (low->list->start->next != low->list->start) {
+        struct node *temp = dequeue(low);
+        printf("dequeued: %s\npriority: %d\nlength: %d\n", temp->key, temp->priority, temp->time);
+        free(temp); // no floating memory here
+    }
 }
 
 void enqueue(struct queue * L, struct node Node) {
@@ -69,9 +108,6 @@ struct node * dequeue(struct queue * L) {
     return values;
 }
 
-void removeElement (struct queue * L) {
-    
-}
 
 struct queue * build() { // build the structure of the queue, mostly memory assignment
     struct queue * Q = NULL;
@@ -116,6 +152,7 @@ struct node * dequeueLong(struct queue * L) {
     struct element *current = L->list->start->next;
     struct element *MAX = current;
 
+    // find the element that will take the longest
     while (current != L->list->start) {
         if (current->info.time >= MAX->info.time) {
             MAX = current;
@@ -123,6 +160,7 @@ struct node * dequeueLong(struct queue * L) {
         current = current->next;
     }
 
+    // Remove task from DLLS
     MAX->next->prev = MAX->prev;
     MAX->prev->next = MAX->next;
 
@@ -143,6 +181,7 @@ struct node * dequeueShort(struct queue * L) {
     struct element *current = L->list->start->next;
     struct element *MIN = current;
 
+    // find shortest task
     while (current != L->list->start) {
         if (current->info.time <= MIN->info.time) {
             MIN = current;
@@ -150,6 +189,7 @@ struct node * dequeueShort(struct queue * L) {
         current = current->next;
     }
 
+    // remove task from DLLS
     MIN->next->prev = MIN->prev;
     MIN->prev->next = MIN->next;
 
