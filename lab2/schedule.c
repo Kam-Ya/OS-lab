@@ -34,15 +34,16 @@ int main (void) {
     struct queue *low = build();
 
     // nodes for test cases
-    struct node one = {.key = "high 1", .priority = 3, .time = 5};
     struct node two = {.key = "high 2", .priority = 3, .time = 3};
-    struct node three = {.key = "medium 1, time = 5", .priority = 2, .time = 5};
-    struct node four = {.key = "medium 2, time = 3", .priority = 2, .time = 3};
-    struct node five = {.key = "low 1, time = 5", .priority = 2, .time = 5};
-    struct node six = {.key = "low 2, time = 3", .priority = 2, .time = 3};
+    struct node four = {.key = "medium 2", .priority = 2, .time = 5};
+    struct node one = {.key = "high 1", .priority = 3, .time = 5};
+    struct node five = {.key = "low 1", .priority = 1, .time = 3};
+    struct node three = {.key = "medium 1", .priority = 2, .time = 3};
+    struct node six = {.key = "low 2", .priority = 1, .time = 5};
 
-    struct node processes[] = {one, two, three, four, five, six};
+    struct node processes[] = {one, two, three, four, five, six}; 
 
+    // adding each node to their respective queue
     for (int i = 0; i < 6; i++) {
         if (processes[i].priority == 3) {
             enqueue(high, processes[i]);
@@ -53,6 +54,7 @@ int main (void) {
         }
     }
 
+    // dequeues every list while they are not empty by checking if the next node from the start isnt the start
     while (high->list->start->next != high->list->start) {
         struct node *temp = dequeue(high);
         printf("dequeued: %s\npriority: %d\nlength: %d\n", temp->key, temp->priority, temp->time);
@@ -60,13 +62,13 @@ int main (void) {
     }
 
     while (med->list->start->next != med->list->start) {
-        struct node *temp = dequeue(med);
+        struct node *temp = dequeueShort(med);
         printf("dequeued: %s\npriority: %d\nlength: %d\n", temp->key, temp->priority, temp->time);
         free(temp); // no floating memory here
-    }
+    }   
 
     while (low->list->start->next != low->list->start) {
-        struct node *temp = dequeue(low);
+        struct node *temp = dequeueLong(low);
         printf("dequeued: %s\npriority: %d\nlength: %d\n", temp->key, temp->priority, temp->time);
         free(temp); // no floating memory here
     }
@@ -87,15 +89,15 @@ void enqueue(struct queue * L, struct node Node) {
     L->elements++;
 }
 
-struct node * dequeue(struct queue * L) {
+struct node * dequeue(struct queue * L) { // FIFO
     if (!L || !L->list || !L->list->start || L->elements == 0) { // checking if input is valid
         printf("Invalid Input");
-        return;
+        return 0;
     }
 
     struct node * values = malloc(sizeof(struct node));
 
-    struct element * temp = L->list->start->next;
+    struct element * temp = L->list->start->prev;
     temp -> prev -> next = temp -> next;
     temp -> next -> prev = temp -> prev;
 
@@ -128,8 +130,8 @@ struct queue * build() { // build the structure of the queue, mostly memory assi
 
             // start node doesnt need any information its never read besides its next and prev pointers
             Q -> list -> start -> info.key = NULL;
-            Q -> list -> start -> info.priority = NULL;
-            Q -> list -> start -> info.time = NULL;
+            Q -> list -> start -> info.priority = 0;
+            Q -> list -> start -> info.time = 0;
         } else {
             printf("Error in assigning memory to start node");
             return 0;
@@ -143,10 +145,10 @@ struct queue * build() { // build the structure of the queue, mostly memory assi
     return Q;
 }
 
-struct node * dequeueLong(struct queue * L) {
+struct node * dequeueLong(struct queue * L) { // longest task first (easy to implement)
     if (!L || !L->list || !L->list->start || L->elements == 0) { // checking if input is valid
         printf("Invalid Input");
-        return;
+        return 0;
     }
 
     struct element *current = L->list->start->next;
@@ -168,14 +170,13 @@ struct node * dequeueLong(struct queue * L) {
     *temp = MAX->info;
     L->elements--;
     free(MAX);
-    free(current);
     return temp;
 }
 
-struct node * dequeueShort(struct queue * L) {
+struct node * dequeueShort(struct queue * L) { // shortest task first
     if (!L || !L->list || !L->list->start || L->elements == 0) { // checking if input is valid
         printf("Invalid Input");
-        return;
+        return 0;
     }
 
     struct element *current = L->list->start->next;
@@ -197,6 +198,5 @@ struct node * dequeueShort(struct queue * L) {
     *temp = MIN->info;
     L->elements--;
     free(MIN);
-    free(current);
     return temp;
 }
