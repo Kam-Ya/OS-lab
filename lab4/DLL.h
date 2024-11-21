@@ -28,7 +28,7 @@ struct queue * build() { // build the structure of the queue, mostly memory assi
     Q = (struct queue *) malloc(sizeof(struct queue));
 
     if (Q) {
-        if (Q -> list) {
+        if (Q -> list = malloc(sizeof(struct DLLS))) {
             Q -> list -> start;
         } else {
             printf("Error in assigning memory to list\n");
@@ -36,12 +36,10 @@ struct queue * build() { // build the structure of the queue, mostly memory assi
         }
 
         // since this is a double linked list im assigning the start node to point to itself both forwards and in reverse
-        if (Q -> list -> start) { 
+        if (Q -> list -> start = malloc(sizeof(struct element))) { 
             Q -> list -> start -> next = Q -> list -> start;
             Q -> list -> start -> prev = Q -> list -> start;
 
-            // start node doesnt need any information its never read besides its next and prev pointers
-            Q -> list -> start -> info.key = NULL;
         } else {
             printf("Error in assigning memory to start node");
             return 0;
