@@ -44,7 +44,7 @@ int main(void) {
             } else {
                 enqueue(Q, current);
             }
-        }
+        }   
     }
 
     return 0;
