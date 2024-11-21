@@ -18,3 +18,12 @@
     - Analytical questions and answers covered
     - 1 programming question:
         1. Design and implement a multi-level queue with priority levels 1, 2, and 3. Give system processes a higher priority than user processes, consider processes to have fixed priority. Each queue should have its own scheduling scheme
+3. Lab3 **Memory Allocation**
+    - Analytical questions and answers covered
+    - 1 programming question
+        1. Take user input and simulate the allocate blocks of memory accordingly.
+4. Lab4 **Paging**
+    - analytical questions and answers covered
+    - 2 programming questions
+        1. Simulate the workings of a page table
+        2. Create a linked list and implement the least recently used (LRU) paging algorithm using user input to determine the length of list and the pages within. 
